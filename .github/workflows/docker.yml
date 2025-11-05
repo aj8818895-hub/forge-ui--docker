@@ -1,34 +1,26 @@
-# ✅ Use a guaranteed working base image
-FROM python:3.10-slim
+name: Build and Push Docker image
 
-LABEL maintainer="you@example.com"
-ENV DEBIAN_FRONTEND=noninteractive
+on:
+  push:
+    branches: [ main ]
 
-# Install system packages (minimal setup)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl wget build-essential \
-    && rm -rf /var/lib/apt/lists/*
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-# Upgrade pip
-RUN python -m pip install --upgrade pip setuptools wheel
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-# Create workspace
-WORKDIR /workspace
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-# Copy requirements first
-COPY requirements.txt /workspace/requirements.txt
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r /workspace/requirements.txt
-
-# Copy the rest of your project
-COPY . /workspace
-
-# Make start script executable (ignore if not present)
-RUN chmod +x /workspace/start.sh || true
-
-# Expose the app port (Gradio or Streamlit usually use 7860)
-EXPOSE 7860
-
-# Start your app
-CMD ["/workspace/start.sh"]
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: abhi8655/forge-ui--docker:latest
