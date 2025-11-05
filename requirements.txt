@@ -2,3 +2,4 @@ lightning
 gradio
 torch
 transformers
+flask
