@@ -1,35 +1,37 @@
-# ✅ Base image — lightweight and works everywhere (no CUDA)
-FROM python:3.10-slim
+# Use CUDA runtime base image (for GPU support)
+FROM nvidia/cuda:12.8.1-cudnn8-runtime-ubuntu22.04
 
-# Maintainer info (optional)
 LABEL maintainer="you@example.com"
+
+# Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1️⃣ Install basic system packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl wget build-essential python3 python3-pip python3-dev \
+# 1) Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl ca-certificates wget build-essential \
+    python3.10 python3.10-dev python3.10-venv python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# 2️⃣ Upgrade pip and wheel
-RUN python -m pip install --upgrade pip setuptools wheel
+# 2) Upgrade pip & install essential Python tools
+RUN python3.10 -m pip install --upgrade pip setuptools wheel
 
-# 3️⃣ Create working directory
+# 3) Create app directory
 WORKDIR /workspace
 
-# 4️⃣ Copy requirements first (for caching)
-COPY requirements.txt /workspace/requirements.txt
+# 4) Copy dependency file first (for layer caching)
+COPY requirements.txt .
 
-# 5️⃣ Install Python dependencies
-RUN pip install --no-cache-dir -r /workspace/requirements.txt
+# 5) Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 6️⃣ Copy the rest of your project
-COPY . /workspace
+# 6) Copy the rest of your project
+COPY . .
 
-# 7️⃣ Make start.sh executable (ignore error if not present)
-RUN chmod +x /workspace/start.sh || true
+# 7) Make your start script executable
+RUN chmod +x /workspace/start.sh
 
-# 8️⃣ Expose app port (for Gradio, Streamlit, etc.)
+# 8) Expose port (adjust if needed)
 EXPOSE 7860
 
-# 9️⃣ Run your start script or main app
+# 9) Default start command
 CMD ["/workspace/start.sh"]
