@@ -1,0 +1,4 @@
+# Put pip packages or git repos here, one per line.
+# Example:
+# some-extension-pypi==1.2.3
+# git+https://github.com/owner/some-ui-extension.git
