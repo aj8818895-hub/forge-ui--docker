@@ -1,57 +1,37 @@
-# ==========================================================
-# Base image with CUDA support (for GPU-enabled environments)
-# ==========================================================
-FROM nvidia/cuda:12.8.1-cudnn8-runtime-ubuntu22.04
+# Use a clean and fast base image (no CUDA or conda lock issues)
+FROM python:3.10-slim
 
-LABEL maintainer="you@example.com"
+# Set a label for info
+LABEL maintainer="yourname@example.com"
 
-# Prevent interactive prompts during apt installs
+# Prevent interactive prompts during package installs
 ENV DEBIAN_FRONTEND=noninteractive
 
-# ----------------------------------------------------------
-# 1️⃣ Install system dependencies and Python
-# ----------------------------------------------------------
+# Install basic system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl ca-certificates wget build-essential \
-    python3.10 python3.10-dev python3.10-venv python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+    git curl wget build-essential ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# ----------------------------------------------------------
-# 2️⃣ Upgrade pip and essential Python tools
-# ----------------------------------------------------------
-RUN python3.10 -m pip install --upgrade pip setuptools wheel
-
-# ----------------------------------------------------------
-# 3️⃣ Set up the working directory
-# ----------------------------------------------------------
+# Set working directory
 WORKDIR /workspace
 
-# ----------------------------------------------------------
-# 4️⃣ Copy dependency list first (for Docker layer caching)
-# ----------------------------------------------------------
+# Upgrade pip and install essential Python tools
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+# Copy dependency list (add your project dependencies in requirements.txt)
 COPY requirements.txt .
 
-# ----------------------------------------------------------
-# 5️⃣ Install Python dependencies
-# ----------------------------------------------------------
+# Install Python dependencies (no cache for smaller image)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ----------------------------------------------------------
-# 6️⃣ Copy the rest of your project files
-# ----------------------------------------------------------
+# Copy your entire project into the container
 COPY . .
 
-# ----------------------------------------------------------
-# 7️⃣ Make your start script executable
-# ----------------------------------------------------------
+# Make your start script executable
 RUN chmod +x /workspace/start.sh
 
-# ----------------------------------------------------------
-# 8️⃣ Expose the app port
-# ----------------------------------------------------------
+# Expose port for your Forge UI backend (adjust if needed)
 EXPOSE 7860
 
-# ----------------------------------------------------------
-# 9️⃣ Default container start command
-# ----------------------------------------------------------
+# Start your app
 CMD ["/workspace/start.sh"]
