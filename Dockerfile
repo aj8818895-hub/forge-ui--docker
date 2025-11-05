@@ -1,32 +1,35 @@
-# Use a CUDA runtime base so GPU works in the container (if your host GPU drivers match)
-FROM nvidia/cuda:12.8.1-cudnn8-runtime-ubuntu22.04
+# ✅ Base image — lightweight and works everywhere (no CUDA)
+FROM python:3.10-slim
 
+# Maintainer info (optional)
 LABEL maintainer="you@example.com"
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1) Install system packages
+# 1️⃣ Install basic system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates wget build-essential python3.10 python3.10-dev python3-pip \
+    git curl wget build-essential python3 python3-pip python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2) Upgrade pip and wheel
-RUN python3.10 -m pip install --upgrade pip setuptools wheel
+# 2️⃣ Upgrade pip and wheel
+RUN python -m pip install --upgrade pip setuptools wheel
 
-# 3) Create workspace directory
+# 3️⃣ Create working directory
 WORKDIR /workspace
 
-# 4) Copy requirements first (layer caching) and install
+# 4️⃣ Copy requirements first (for caching)
 COPY requirements.txt /workspace/requirements.txt
+
+# 5️⃣ Install Python dependencies
 RUN pip install --no-cache-dir -r /workspace/requirements.txt
 
-# 5) Copy the rest of the project
+# 6️⃣ Copy the rest of your project
 COPY . /workspace
 
-# 6) Make start.sh executable
-RUN chmod +x /workspace/start.sh
+# 7️⃣ Make start.sh executable (ignore error if not present)
+RUN chmod +x /workspace/start.sh || true
 
-# 7) Expose the port the UI uses
+# 8️⃣ Expose app port (for Gradio, Streamlit, etc.)
 EXPOSE 7860
 
-# 8) Default command: run our start script
+# 9️⃣ Run your start script or main app
 CMD ["/workspace/start.sh"]
