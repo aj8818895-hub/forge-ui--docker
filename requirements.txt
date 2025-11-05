@@ -1,5 +1,4 @@
-gradio==3.43.1
-# Add any other Python libs you need for your UI here, pin versions if possible
-# torch can be installed here if you need it, but large packages may be downloaded at runtime
-# Example (uncomment only if needed and you have GPU/space):
-# torch==2.1.0+cu121 -f https://download.pytorch.org/whl/torch_stable.html
+lightning
+gradio
+torch
+transformers
