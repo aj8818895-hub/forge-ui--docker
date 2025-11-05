@@ -23,4 +23,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: abhi8655/forge-ui--docker:latest
+          tags: aj8818895-hub/forge-ui--docker:latest
+          platforms: linux/amd64
+          file: ./Dockerfile
